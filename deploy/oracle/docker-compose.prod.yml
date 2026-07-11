@@ -1,0 +1,74 @@
+name: tradeos-production
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: tradeos
+      POSTGRES_USER: tradeos
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U tradeos -d tradeos"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+    networks:
+      - internal
+
+  api:
+    build:
+      context: ../../backend
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql+psycopg://tradeos:${POSTGRES_PASSWORD}@db:5432/tradeos
+      JWT_SECRET: ${JWT_SECRET}
+      ENCRYPTION_KEY: ${ENCRYPTION_KEY}
+      CORS_ORIGINS: ${FRONTEND_ORIGIN}
+      FRONTEND_URL: ${FRONTEND_ORIGIN}
+      ALLOWED_HOSTS: ${API_DOMAIN},api,localhost,127.0.0.1
+      SEED_DEMO: "false"
+      BROKER_PUBLIC_IP: ${BROKER_PUBLIC_IP}
+      BROKER_LOCAL_IP: ${BROKER_LOCAL_IP:-}
+      BROKER_MAC_ADDRESS: ${BROKER_MAC_ADDRESS:-}
+    expose:
+      - "8000"
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - internal
+      - edge
+    tmpfs:
+      - /tmp
+
+  caddy:
+    image: caddy:2.9-alpine
+    restart: unless-stopped
+    environment:
+      API_DOMAIN: ${API_DOMAIN}
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      api:
+        condition: service_healthy
+    networks:
+      - edge
+
+volumes:
+  postgres_data:
+  caddy_data:
+  caddy_config:
+
+networks:
+  internal:
+    internal: true
+  edge:
