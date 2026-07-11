@@ -1,0 +1,24 @@
+# Environment and secrets
+.env
+*.env.local
+.vercel/
+.mypy_cache/
+deploy/oracle/.env.production
+deploy/oracle/backups/
+
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+backend/.venv/
+backend/tradeos.db
+
+# Frontend
+frontend/node_modules/
+frontend/dist/
+frontend/*.tsbuildinfo
+
+# Editors and operating systems
+.idea/
+.vscode/
+.DS_Store
