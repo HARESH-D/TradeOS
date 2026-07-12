@@ -32,8 +32,11 @@ def serialize_trade(trade: Trade) -> dict:
 
 
 def dashboard_data(db: Session, user_id: int) -> dict:
-    trades = list(db.scalars(select(Trade).where(Trade.user_id == user_id).order_by(Trade.trade_date)).all())
     account = db.scalar(select(BrokerAccount).where(BrokerAccount.user_id == user_id).order_by(BrokerAccount.id.desc()))
+    trade_filters = [Trade.user_id == user_id]
+    if account:
+        trade_filters.append(Trade.broker_account_id == account.id)
+    trades = list(db.scalars(select(Trade).where(*trade_filters).order_by(Trade.trade_date)).all())
     closed = [trade for trade in trades if trade.status == "CLOSED"]
     winners = [trade for trade in closed if trade.net_pnl > 0]
     losers = [trade for trade in closed if trade.net_pnl < 0]
@@ -99,4 +102,3 @@ def dashboard_data(db: Session, user_id: int) -> dict:
         "calendar": calendar,
         "recent_trades": recent,
     }
-

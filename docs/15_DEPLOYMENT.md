@@ -21,3 +21,9 @@ Set strong `JWT_SECRET` and `ENCRYPTION_KEY` values before any non-local deploym
 The prepared production topology uses Vercel for the Vite frontend and an Oracle Cloud VM for FastAPI, PostgreSQL, HTTPS termination, and the reserved outbound IPv4 required for broker allowlisting.
 
 See [24_ORACLE_VERCEL_DEPLOYMENT.md](24_ORACLE_VERCEL_DEPLOYMENT.md) for the complete provisioning, deployment, verification, Angel One registration, backup, and recovery procedure.
+
+## Vercel POC
+
+For the current no-card POC, the frontend and FastAPI backend can run as separate Vercel projects with managed PostgreSQL. See [26_VERCEL_POC_DEPLOYMENT.md](26_VERCEL_POC_DEPLOYMENT.md).
+
+This topology is suitable for authentication, dashboards, analysis and statement uploads. Vercel Hobby egress is dynamic, so its observed IP must not be represented as a reserved or stable Angel One allowlist address. Use statement upload for reliable data ingestion until the backend moves to infrastructure with a reserved outbound IP.

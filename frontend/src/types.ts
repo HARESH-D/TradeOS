@@ -69,7 +69,18 @@ export type SyncRun = {
   started_at: string
   completed_at: string | null
   records_synced: number
-  details: Record<string, number> | null
+  details: Record<string, number | string> | null
   error_message: string | null
 }
 
+export type StatementImportResult = {
+  status: string
+  records_imported: number
+  realized_positions: number
+  open_positions: number
+  charges: number
+  adjustments: number
+  period_start: string
+  period_end: string
+  date_basis: string
+}
