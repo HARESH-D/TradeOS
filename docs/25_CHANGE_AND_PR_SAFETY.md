@@ -41,7 +41,8 @@ Automation cannot prove business correctness. Authentication, user scoping, brok
 After the workflows land on `main`, protect the `main` branch with these settings:
 
 - Require a pull request before merging
-- Require at least one approval and code-owner review
+- Keep the approval count at zero while this is a solo-maintainer repository because an author cannot approve their own PR
+- Require at least one approval and code-owner review as soon as a second maintainer is added
 - Dismiss stale approvals when new commits are pushed
 - Require all Quality Gate, CodeQL, Dependency Review, and Secret Scan checks
 - Require branches to be up to date before merging
