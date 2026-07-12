@@ -68,8 +68,8 @@ Update this table in each release PR. Use the final PR number and merge commit a
 | Date | Commit or PR | Summary | Risk | Verification |
 | --- | --- | --- | --- | --- |
 | Initial | `737acdc` | Repository initialization | Low | Repository created |
-| 2026-07-12 | `5b5d390` / pending PR | Trading dashboard, manual broker sync, analysis grid, documentation, and deployment bundle | High | Backend tests, frontend build and audit, Docker production smoke tests, browser smoke tests |
-| 2026-07-12 | Pending PR | Add PR governance, quality gates, security scans, dependency automation, and patched backend dependencies | Medium | Full local quality gate, image builds, workflow validation, and GitHub checks |
+| 2026-07-12 | PR `#1` / `5b5d390` | Trading dashboard, manual broker sync, analysis grid, documentation, and deployment bundle | High | Backend tests, frontend build and audit, Docker production smoke tests, browser smoke tests |
+| 2026-07-12 | PR `#1` / `c077844` | Add PR governance, quality gates, security scans, dependency automation, and patched backend dependencies | Medium | Full local quality gate, image builds, workflow validation, and GitHub checks |
 
 ## 7. Incident Rule
 
