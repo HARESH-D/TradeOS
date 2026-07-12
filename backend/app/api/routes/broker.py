@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
 from fastapi.responses import RedirectResponse
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -10,9 +10,15 @@ from app.core.security import encrypt_secret
 from app.db.models import BrokerAccount, SyncRun, User
 from app.db.session import get_db
 from app.schemas.api import BrokerConnectRequest
+from app.services.statement_import_service import (
+    StatementFormatError,
+    import_angel_pnl_statement,
+    parse_angel_pnl_statement,
+)
 from app.services.sync_service import run_sync
 
 router = APIRouter(prefix="/broker", tags=["broker"])
+MAX_STATEMENT_BYTES = 4 * 1024 * 1024
 
 
 @router.get("/angel-one/callback", include_in_schema=False)
@@ -92,6 +98,8 @@ async def sync_broker(user: User = Depends(current_user), db: Session = Depends(
     account = db.scalar(select(BrokerAccount).where(BrokerAccount.user_id == user.id).order_by(BrokerAccount.id.desc()))
     if not account:
         raise HTTPException(status_code=409, detail="Connect a broker before syncing")
+    if account.mode == "statement":
+        raise HTTPException(status_code=409, detail="Upload a new P&L statement to refresh this account")
     try:
         sync_run = await run_sync(db, account)
     except Exception as exc:
@@ -103,6 +111,28 @@ async def sync_broker(user: User = Depends(current_user), db: Session = Depends(
         "records_synced": sync_run.records_synced,
         "details": sync_run.details,
     }
+
+
+@router.post("/statement/import")
+async def import_pnl_statement(
+    file: UploadFile = File(...),
+    user: User = Depends(current_user),
+    db: Session = Depends(get_db),
+):
+    filename = (file.filename or "").strip()
+    if not filename.lower().endswith(".xlsx"):
+        raise HTTPException(status_code=415, detail="Upload an Angel One .xlsx P&L statement")
+    content = await file.read(MAX_STATEMENT_BYTES + 1)
+    await file.close()
+    if len(content) > MAX_STATEMENT_BYTES:
+        raise HTTPException(status_code=413, detail="The statement exceeds the 4 MB upload limit")
+    if not content:
+        raise HTTPException(status_code=422, detail="The uploaded statement is empty")
+    try:
+        statement = parse_angel_pnl_statement(content)
+        return import_angel_pnl_statement(db, user.id, statement, filename)
+    except StatementFormatError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
 
 
 @router.get("/sync/history")

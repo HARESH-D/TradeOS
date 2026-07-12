@@ -8,6 +8,7 @@
 - `GET /api/broker`
 - `POST /api/broker/connect`
 - `POST /api/broker/sync`
+- `POST /api/broker/statement/import`
 - `GET /api/broker/sync/history`
 - `GET /api/dashboard`
 - `GET /api/analysis`
@@ -28,6 +29,9 @@
 
 - Broker APIs are read-only.
 - Manual sync is user-triggered.
+- Statement import accepts an authenticated multipart upload named `file`. It supports Angel One equity P&L `.xlsx` files up to 4 MB.
+- Re-importing a statement replaces the user's previous statement-derived trades, while preserving a sync-history entry for each import.
+- P&L statements aggregate by symbol and omit individual execution dates. Imported rows therefore use the statement period end date and expose that choice as `date_basis: statement_period_end`.
 - Dashboard APIs return summarized metrics and chart/calendar data.
 - Analysis grid APIs return paginated, sortable, filterable trading records.
 - Broker PIN/password and TOTP are accepted only during connect and must not be persisted or logged.

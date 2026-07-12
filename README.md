@@ -9,6 +9,7 @@ The current application includes:
 - Email/password authentication with a seeded demo account
 - Responsive trading dashboard with KPIs, equity curve, daily P&L and profit calendar
 - Manual broker sync with demo and Angel One SmartAPI connection modes
+- Manual Angel One P&L statement import from XLSX when live broker sync is unavailable
 - Spreadsheet-style trade analysis with per-column filters, sorting, pagination and CSV export
 - Persistent SQLite development data and PostgreSQL-backed Docker deployment
 - Encrypted broker API keys and session tokens; broker PIN and TOTP are never stored
@@ -52,6 +53,6 @@ The product direction and future phases remain documented in [docs/00_MASTER_SPE
 
 For an interview-ready explanation of the architecture, begin with [docs/20_SYSTEM_DESIGN_GUIDE.md](docs/20_SYSTEM_DESIGN_GUIDE.md), then use the linked HLD, LLD, and architecture improvement plan for deeper discussion.
 
-The production deployment bundle and operator steps are documented in [docs/24_ORACLE_VERCEL_DEPLOYMENT.md](docs/24_ORACLE_VERCEL_DEPLOYMENT.md).
+The zero-cost POC deployment using Vercel and managed PostgreSQL is documented in [docs/26_VERCEL_POC_DEPLOYMENT.md](docs/26_VERCEL_POC_DEPLOYMENT.md). It does not provide a fixed broker-facing IP. The production topology with a reserved IP remains documented in [docs/24_ORACLE_VERCEL_DEPLOYMENT.md](docs/24_ORACLE_VERCEL_DEPLOYMENT.md).
 
 Commit, pull request, automated review, and rollback rules are documented in [docs/25_CHANGE_AND_PR_SAFETY.md](docs/25_CHANGE_AND_PR_SAFETY.md). Security vulnerabilities should be reported using [SECURITY.md](SECURITY.md).

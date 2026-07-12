@@ -5,7 +5,7 @@ from sqlalchemy import asc, desc, func, or_, select
 from sqlalchemy.orm import Session
 
 from app.api.deps import current_user
-from app.db.models import Trade, User
+from app.db.models import BrokerAccount, Trade, User
 from app.db.session import get_db
 from app.services.analytics_service import dashboard_data, serialize_trade
 
@@ -32,6 +32,11 @@ def analysis_grid(
     db: Session = Depends(get_db),
 ):
     filters = [Trade.user_id == user.id]
+    active_account = db.scalar(
+        select(BrokerAccount).where(BrokerAccount.user_id == user.id).order_by(BrokerAccount.id.desc())
+    )
+    if active_account:
+        filters.append(Trade.broker_account_id == active_account.id)
     if search:
         term = f"%{search.strip()}%"
         filters.append(or_(Trade.symbol.ilike(term), Trade.broker_trade_id.ilike(term)))
@@ -59,4 +64,3 @@ def analysis_grid(
     order = desc(sort_column) if sort_direction == "desc" else asc(sort_column)
     rows = db.scalars(select(Trade).where(*filters).order_by(order, Trade.id.desc()).offset(offset).limit(limit)).all()
     return {"total": total, "items": [serialize_trade(row) for row in rows]}
-

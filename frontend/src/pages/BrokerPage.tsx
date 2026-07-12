@@ -1,9 +1,9 @@
-import { Check, Database, KeyRound, Link2, RefreshCw, ShieldCheck, Unplug, WalletCards } from 'lucide-react'
-import { FormEvent, useCallback, useEffect, useState } from 'react'
+import { Check, Database, FileSpreadsheet, KeyRound, Link2, RefreshCw, ShieldCheck, Unplug, Upload, WalletCards } from 'lucide-react'
+import { FormEvent, useCallback, useEffect, useRef, useState } from 'react'
 
 import { api } from '../lib/api'
 import { currency, formatDateTime } from '../lib/format'
-import type { BrokerAccount, SyncRun } from '../types'
+import type { BrokerAccount, StatementImportResult, SyncRun } from '../types'
 
 export function BrokerPage() {
   const [account, setAccount] = useState<BrokerAccount | null>(null)
@@ -13,6 +13,9 @@ export function BrokerPage() {
   const [busy, setBusy] = useState(false)
   const [message, setMessage] = useState('')
   const [error, setError] = useState('')
+  const [statementFile, setStatementFile] = useState<File | null>(null)
+  const [importResult, setImportResult] = useState<StatementImportResult | null>(null)
+  const statementInput = useRef<HTMLInputElement>(null)
 
   const load = useCallback(async () => {
     const [broker, runs] = await Promise.all([api<BrokerAccount>('/broker'), api<SyncRun[]>('/broker/sync/history')])
@@ -46,11 +49,28 @@ export function BrokerPage() {
     } finally { setBusy(false) }
   }
 
+  async function importStatement() {
+    if (!statementFile) return
+    setBusy(true); setError(''); setMessage(''); setImportResult(null)
+    try {
+      const body = new FormData()
+      body.append('file', statementFile)
+      const result = await api<StatementImportResult>('/broker/statement/import', { method: 'POST', body })
+      setImportResult(result)
+      setMessage(`${result.records_imported} statement records imported.`)
+      setStatementFile(null)
+      if (statementInput.current) statementInput.current.value = ''
+      await load()
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : 'Statement import failed')
+    } finally { setBusy(false) }
+  }
+
   return (
     <div className="broker-page">
       <div className="workspace-toolbar">
         <div className="sync-summary"><span className={`status-dot ${account?.status}`} /><strong>{account?.broker_name ?? 'Broker disconnected'}</strong><span>{account?.client_code ?? 'No account selected'}</span></div>
-        <button className="primary-button" onClick={sync} disabled={busy || account?.status === 'disconnected'}><RefreshCw size={16} className={busy ? 'spin' : ''} />Sync now</button>
+        <button className="primary-button" onClick={sync} disabled={busy || account?.status === 'disconnected' || account?.mode === 'statement'}><RefreshCw size={16} className={busy ? 'spin' : ''} />{account?.mode === 'statement' ? 'Statement account' : 'Sync now'}</button>
       </div>
       {(message || error) && <div className={`page-alert ${error ? 'error' : 'success'}`}>{error || message}</div>}
 
@@ -90,11 +110,24 @@ export function BrokerPage() {
           <div className="panel-header"><div><h2>Sync history</h2><p>Recent broker imports</p></div></div>
           <div className="sync-history-list">
             {history.length === 0 && <div className="empty-state small">No sync runs yet</div>}
-            {history.map((run) => <div className="sync-history-row" key={run.id}><span className={`sync-run-icon ${run.status}`}><RefreshCw size={16} /></span><div><strong>Manual broker sync</strong><span>{formatDateTime(run.completed_at ?? run.started_at)}</span></div><div className="sync-result"><strong>{run.records_synced}</strong><span>records</span></div><span className={`status-pill ${run.status}`}>{run.status}</span></div>)}
+            {history.map((run) => <div className="sync-history-row" key={run.id}><span className={`sync-run-icon ${run.status}`}>{run.details?.source === 'statement' ? <FileSpreadsheet size={16} /> : <RefreshCw size={16} />}</span><div><strong>{run.details?.source === 'statement' ? 'P&L statement import' : 'Manual broker sync'}</strong><span>{formatDateTime(run.completed_at ?? run.started_at)}</span></div><div className="sync-result"><strong>{run.records_synced}</strong><span>records</span></div><span className={`status-pill ${run.status}`}>{run.status}</span></div>)}
           </div>
+        </section>
+
+        <section className="panel statement-panel">
+          <div className="panel-header"><div><h2>Import P&amp;L statement</h2><p>Angel One equity XLSX</p></div><FileSpreadsheet size={18} /></div>
+          <div className="statement-import-body">
+            <input ref={statementInput} className="visually-hidden" type="file" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" onChange={(event) => setStatementFile(event.target.files?.[0] ?? null)} />
+            <button type="button" className="statement-file-picker" onClick={() => statementInput.current?.click()}>
+              <span><Upload size={20} /></span>
+              <div><strong>{statementFile?.name ?? 'Choose Angel One statement'}</strong><small>{statementFile ? `${(statementFile.size / 1024).toFixed(1)} KB` : 'XLSX, up to 4 MB'}</small></div>
+            </button>
+            <button type="button" className="primary-button statement-import-button" onClick={importStatement} disabled={busy || !statementFile}>{busy ? 'Importing...' : 'Import statement'}</button>
+          </div>
+          {importResult && <div className="statement-result"><div><span>Period</span><strong>{importResult.period_start} to {importResult.period_end}</strong></div><div><span>Realized</span><strong>{importResult.realized_positions}</strong></div><div><span>Open</span><strong>{importResult.open_positions}</strong></div><div><span>Adjustments</span><strong>{importResult.adjustments}</strong></div></div>}
+          <div className="statement-date-note"><ShieldCheck size={16} /><span>Symbol totals use the statement period end date because this report does not contain individual trade dates.</span></div>
         </section>
       </section>
     </div>
   )
 }
-

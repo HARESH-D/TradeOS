@@ -7,6 +7,7 @@
 - [x] Trading dashboard
 - [x] Angel One broker connect flow
 - [x] Manual broker sync
+- [x] Manual Angel One P&L statement import
 - [x] Mock broker data
 - [x] Dashboard KPI cards
 - [x] P&L calendar
@@ -14,6 +15,8 @@
 - [x] Analysis grid
 - [x] Column filters and sorting
 - [ ] Live Angel One validation with a real account
+- [ ] Import Angel One tradebook for execution-level entry and exit dates
+- [ ] Support additional sanitized P&L statement layouts
 
 ## Priority 2 - Portfolio and Reporting
 

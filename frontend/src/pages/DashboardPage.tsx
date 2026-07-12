@@ -1,5 +1,6 @@
-import { Activity, BadgeIndianRupee, CalendarDays, RefreshCw, Scale, Target, TrendingUp, WalletCards } from 'lucide-react'
+import { Activity, BadgeIndianRupee, CalendarDays, RefreshCw, Scale, Target, TrendingUp, Upload, WalletCards } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 
 import { MetricCard } from '../components/MetricCard'
@@ -48,7 +49,7 @@ export function DashboardPage() {
     <div className="dashboard-page">
       <div className="workspace-toolbar">
         <div className="sync-summary"><span className={`status-dot ${data.broker.status}`} /> <strong>{data.broker.name ?? 'No broker'}</strong><span>Last sync {formatDateTime(data.broker.last_synced_at)}</span></div>
-        <div className="toolbar-actions"><button className="select-button"><CalendarDays size={16} />All history</button><button className="primary-button" onClick={sync} disabled={syncing}><RefreshCw size={16} className={syncing ? 'spin' : ''} />{syncing ? 'Syncing...' : 'Sync broker'}</button></div>
+        <div className="toolbar-actions"><button className="select-button"><CalendarDays size={16} />All history</button>{data.broker.mode === 'statement' ? <Link className="primary-button" to="/broker"><Upload size={16} />Upload statement</Link> : <button className="primary-button" onClick={sync} disabled={syncing}><RefreshCw size={16} className={syncing ? 'spin' : ''} />{syncing ? 'Syncing...' : 'Sync broker'}</button>}</div>
       </div>
       {error && <div className="page-alert">{error}</div>}
 
@@ -114,4 +115,3 @@ export function DashboardPage() {
     </div>
   )
 }
-
