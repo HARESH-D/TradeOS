@@ -8,7 +8,6 @@ from app.db.models import User
 from app.db.session import get_db
 from app.schemas.api import AuthRequest, RegisterRequest
 
-
 router = APIRouter(prefix="/auth", tags=["auth"])
 
 

@@ -1,0 +1,8 @@
+# Require the repository owner to review all changes once branch protection is enabled.
+* @HARESH-D
+
+# Treat security, broker integration, and deployment changes as sensitive.
+/backend/app/broker/ @HARESH-D
+/backend/app/core/ @HARESH-D
+/deploy/ @HARESH-D
+/.github/ @HARESH-D

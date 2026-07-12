@@ -1,0 +1,101 @@
+name: Quality Gate
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: quality-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backend:
+    name: Backend tests, quality, and audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+
+      - name: Set up Python
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: |
+            backend/requirements.txt
+            backend/requirements-dev.txt
+
+      - name: Install dependencies
+        run: python -m pip install -r backend/requirements-dev.txt
+
+      - name: Check Python quality
+        run: ruff check backend/app backend/tests
+
+      - name: Scan Python security risks
+        run: bandit -r backend/app -ll -ii
+
+      - name: Run backend tests
+        run: pytest -q backend/tests
+
+      - name: Compile backend modules
+        run: python -m compileall -q backend/app
+
+      - name: Audit Python dependencies
+        run: pip-audit -r backend/requirements.txt
+
+  frontend:
+    name: Frontend types, build, and audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+
+      - name: Set up Node.js
+        uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6.1.0
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+          package-manager-cache: false
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Check TypeScript
+        run: npm run lint
+
+      - name: Build production frontend
+        run: npm run build
+
+      - name: Audit frontend dependencies
+        run: npm audit --audit-level=moderate
+
+  containers:
+    name: Compose and container validation
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+
+      - name: Validate local Compose configuration
+        run: docker compose -f docker-compose.yml config --quiet
+
+      - name: Validate production Compose configuration
+        run: docker compose --env-file deploy/oracle/.env.production.example -f deploy/oracle/docker-compose.prod.yml config --quiet
+
+      - name: Build API image
+        run: docker build --tag tradeos-api:ci backend
+
+      - name: Build web image
+        run: docker build --tag tradeos-web:ci frontend

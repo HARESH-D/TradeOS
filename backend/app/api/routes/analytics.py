@@ -9,7 +9,6 @@ from app.db.models import Trade, User
 from app.db.session import get_db
 from app.services.analytics_service import dashboard_data, serialize_trade
 
-
 router = APIRouter(tags=["analytics"])
 
 
