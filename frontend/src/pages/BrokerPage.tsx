@@ -16,6 +16,9 @@ export function BrokerPage() {
   const [statementFile, setStatementFile] = useState<File | null>(null)
   const [importResult, setImportResult] = useState<StatementImportResult | null>(null)
   const statementInput = useRef<HTMLInputElement>(null)
+  const latestDetails = history[0]?.details
+  const tradeCount = Number(latestDetails?.trades ?? 0)
+    || (Number(latestDetails?.realized ?? 0) + Number(latestDetails?.open_positions ?? 0))
 
   const load = useCallback(async () => {
     const [broker, runs] = await Promise.all([api<BrokerAccount>('/broker'), api<SyncRun[]>('/broker/sync/history')])
@@ -85,7 +88,7 @@ export function BrokerPage() {
 
       <section className="sync-count-grid">
         <div><WalletCards size={18} /><span>Holdings</span><strong>{account?.counts?.holdings ?? 0}</strong></div>
-        <div><Database size={18} /><span>Trades</span><strong>{history[0]?.details?.trades ?? 0}</strong></div>
+        <div><Database size={18} /><span>Trades</span><strong>{tradeCount}</strong></div>
         <div><Link2 size={18} /><span>Orders</span><strong>{account?.counts?.orders ?? 0}</strong></div>
         <div><Unplug size={18} /><span>Positions</span><strong>{account?.counts?.positions ?? 0}</strong></div>
       </section>
