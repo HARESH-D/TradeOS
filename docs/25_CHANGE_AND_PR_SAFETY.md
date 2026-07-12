@@ -73,6 +73,7 @@ Update this table in each release PR. Use the final PR number and merge commit a
 | 2026-07-12 | PR `#1` / `c077844` | Add PR governance, quality gates, security scans, dependency automation, and patched backend dependencies | Medium | Full local quality gate, image builds, workflow validation, and GitHub checks |
 | 2026-07-12 | PR `#16` / `6223039` | Add Angel One statement import, statement-aware analytics, and Vercel POC backend support | High | Full quality gate, dependency audits, real-workbook parsing, and duplicate-safe HTTP import smoke test |
 | 2026-07-12 | PR `#19` / `4cc8c77` | Add the AI Agent workspace shell and clean-room milestone architecture | Medium | Full quality gate, dependency audits, and responsive Playwright interaction checks |
+| 2026-07-12 | PR `#20` / `3f8605f` | Add persistent Gemini grounded research, authenticated run APIs, citations, and result UI | High | Full quality gate, provider contract tests, user-isolation tests, HTTP smoke checks, and responsive browser verification |
 
 ## 7. Incident Rule
 
