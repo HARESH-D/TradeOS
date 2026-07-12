@@ -27,3 +27,5 @@ See [24_ORACLE_VERCEL_DEPLOYMENT.md](24_ORACLE_VERCEL_DEPLOYMENT.md) for the com
 For the current no-card POC, the frontend and FastAPI backend can run as separate Vercel projects with managed PostgreSQL. See [26_VERCEL_POC_DEPLOYMENT.md](26_VERCEL_POC_DEPLOYMENT.md).
 
 This topology is suitable for authentication, dashboards, analysis and statement uploads. Vercel Hobby egress is dynamic, so its observed IP must not be represented as a reserved or stable Angel One allowlist address. Use statement upload for reliable data ingestion until the backend moves to infrastructure with a reserved outbound IP.
+
+Grounded AI research additionally requires backend-only `GEMINI_API_KEY`. `GEMINI_MODEL` defaults to `gemini-2.5-flash`, selected because the current Gemini free tier includes a limited daily grounded-search allowance. Redeploy the API after changing either value. Never configure the key in the Vite frontend project.

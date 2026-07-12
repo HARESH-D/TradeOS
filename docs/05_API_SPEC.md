@@ -12,6 +12,9 @@
 - `GET /api/broker/sync/history`
 - `GET /api/dashboard`
 - `GET /api/analysis`
+- `GET /api/agent/status`
+- `GET /api/agent/runs`
+- `POST /api/agent/runs`
 - `GET /health`
 
 ## Planned APIs
@@ -35,6 +38,11 @@
 - Dashboard APIs return summarized metrics and chart/calendar data.
 - Analysis grid APIs return paginated, sortable, filterable trading records.
 - Broker PIN/password and TOTP are accepted only during connect and must not be persisted or logged.
+- Agent status reports provider readiness without exposing keys.
+- Agent run history is authenticated and scoped to the current user.
+- `POST /api/agent/runs` currently accepts Gemini research mode. Trade review, portfolio mode and Llama return `409` until their runtimes are connected.
+- Missing Gemini configuration returns `503`; provider and quota failures return `502`. Failed attempts remain visible in run history for audit.
+- Completed research returns the answer, model, search queries and HTTPS citation records.
 
 The current sync endpoint completes inline and returns `200`. The production target is `POST /api/v1/broker-accounts/{account_id}/sync-runs`, returning `202` with an asynchronous run ID and idempotency key behavior.
 

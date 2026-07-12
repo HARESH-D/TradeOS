@@ -10,6 +10,9 @@
 - Runtime smoke checks for login, manual sync, dashboard and filtered analysis APIs
 - Angel One XLSX parsing, realized/open normalization, charge allocation and idempotent statement re-import
 - Desktop and mobile visual checks for all current screens
+- Gemini response parsing, query deduplication, citation deduplication and unsafe citation rejection
+- Successful and failed agent-run persistence plus cross-user history isolation
+- AI Agent provider-unavailable API smoke checks and responsive persisted-result rendering
 
 ## Commands
 

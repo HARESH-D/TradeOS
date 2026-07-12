@@ -31,9 +31,10 @@
 
 - [x] Clean-room agent architecture
 - [x] AI Agent navigation and workspace shell
-- [ ] Gemini provider and grounded research workflow
+- [x] Gemini provider and grounded research workflow
 - [ ] Local Ollama/Llama companion runner
-- [ ] Persistent agent runs, evidence, and citations
+- [x] Persistent agent runs and citation records
+- [ ] Dedicated evidence ledger, resumable checkpoints and streaming
 - AI trade review
 - Pattern detection
 - Monthly performance summary

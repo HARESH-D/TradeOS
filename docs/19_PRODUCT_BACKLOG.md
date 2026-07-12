@@ -41,10 +41,11 @@
 
 - [x] AI Agent navigation and workspace shell
 - [x] Clean-room provider-neutral agent design
-- [ ] Gemini grounded research provider
+- [x] Gemini grounded research provider
 - [ ] Ollama/Llama local provider
-- [ ] Evidence ledger and citation verifier
-- [ ] Persistent runs and resumable checkpoints
+- [x] Persistent research runs and citation records
+- [ ] Dedicated evidence ledger and citation verifier
+- [ ] Resumable checkpoints and streamed run progress
 - [ ] AI Coach
 - AI trade review
 - Monthly AI summary

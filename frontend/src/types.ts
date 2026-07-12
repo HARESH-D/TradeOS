@@ -84,3 +84,32 @@ export type StatementImportResult = {
   period_end: string
   date_basis: string
 }
+
+export type AgentRuntimeStatus = {
+  providers: {
+    gemini: { configured: boolean; model: string | null }
+    llama: { configured: boolean; model: string | null }
+  }
+  modes: Record<'research' | 'trades' | 'portfolio', boolean>
+}
+
+export type AgentSource = {
+  url: string
+  title: string
+  cited_text: string
+}
+
+export type AgentRun = {
+  id: number
+  mode: 'research' | 'trades' | 'portfolio'
+  provider: 'gemini' | 'llama' | string
+  model: string
+  status: 'running' | 'completed' | 'failed'
+  prompt: string
+  answer: string | null
+  sources: AgentSource[]
+  search_queries: string[]
+  error_message: string | null
+  created_at: string
+  completed_at: string | null
+}

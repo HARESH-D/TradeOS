@@ -19,3 +19,8 @@ class BrokerConnectRequest(BaseModel):
     pin: str | None = None
     totp: str | None = None
 
+
+class AgentRunRequest(BaseModel):
+    mode: Literal["research", "trades", "portfolio"] = "research"
+    provider: Literal["gemini", "llama"] = "gemini"
+    prompt: str = Field(min_length=5, max_length=4_000)
