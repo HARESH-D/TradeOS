@@ -31,9 +31,14 @@ CORS_ORIGINS=https://<frontend-host>
 FRONTEND_URL=https://<frontend-host>
 ALLOWED_HOSTS=<backend-host>
 SEED_DEMO=false
+GEMINI_API_KEY=<Google AI Studio key>
+GEMINI_MODEL=gemini-2.5-flash
+AGENT_REQUEST_TIMEOUT_SECONDS=90
 ```
 
 Never commit these values. Broker PIN and TOTP remain ephemeral and must not be stored or logged.
+
+`GEMINI_API_KEY` is optional for the trading dashboard but required for AI research. Configure it only on the backend project. The status API reveals whether it exists but never returns the key.
 
 ## Frontend Environment
 
@@ -53,6 +58,7 @@ Redeploy the frontend after changing the value because Vite embeds it at build t
 4. Confirm the import summary and sync-history record appear.
 5. Confirm dashboard and analysis rows contain only that user's imported data.
 6. Upload the same statement again and confirm trades are replaced rather than duplicated.
+7. When Gemini is configured, run a public research question and confirm the answer and source links persist after refresh.
 
 ## Statement Semantics
 

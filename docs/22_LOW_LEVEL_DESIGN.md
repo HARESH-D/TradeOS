@@ -16,6 +16,10 @@ backend/app/
       auth.py               registration, login, current user
       broker.py             connection, sync, sync history
       analytics.py          dashboard and analysis reads
+      agent.py              provider status and research runs
+  agent/
+    contracts.py            provider-neutral research result contract
+    gemini.py               Gemini Interactions API and citation parsing
   broker/
     base.py                 canonical adapter protocol and snapshot types
     mock.py                 deterministic test/demo adapter
@@ -31,6 +35,7 @@ backend/app/
   services/
     sync_service.py         fetch, normalize, and persist broker records
     analytics_service.py    KPI and time-series calculations
+    agent_service.py        run persistence and provider orchestration
   main.py                   application composition and demo seed
 ```
 
@@ -52,6 +57,7 @@ frontend/src/
     DashboardPage.tsx
     BrokerPage.tsx
     AnalysisPage.tsx
+    AgentPage.tsx
   App.tsx                   authentication gate and lazy routes
   types.ts                  frontend API response types
   styles.css                responsive design system and screen styles
@@ -66,6 +72,7 @@ erDiagram
     USER ||--o{ BROKER_ACCOUNT : owns
     USER ||--o{ SYNC_RUN : initiates
     USER ||--o{ TRADE : owns
+    USER ||--o{ AGENT_RUN : researches
     BROKER_ACCOUNT ||--o{ SYNC_RUN : produces
     BROKER_ACCOUNT ||--o{ TRADE : supplies
 
@@ -125,6 +132,21 @@ erDiagram
         timestamp exit_time
         int holding_minutes
         json raw_data
+    }
+    AGENT_RUN {
+        bigint id PK
+        bigint user_id FK
+        varchar mode
+        varchar provider
+        varchar model
+        varchar status
+        text prompt
+        text answer
+        json sources
+        json search_queries
+        text error_message
+        timestamp created_at
+        timestamp completed_at
     }
 ```
 
@@ -359,6 +381,11 @@ All protected endpoints derive user identity from the session. Clients never pro
 | `GET` | `/api/broker/sync/history` | Recent runs | `200`, `401` |
 | `GET` | `/api/dashboard` | Dashboard response | `200`, `401` |
 | `GET` | `/api/analysis` | Filtered normalized trades | `200`, `401`, `422` |
+| `GET` | `/api/agent/status` | Provider and mode readiness | `200`, `401` |
+| `GET` | `/api/agent/runs` | User-scoped research history | `200`, `401`, `422` |
+| `POST` | `/api/agent/runs` | Run Gemini grounded research inline | `200`, `401`, `409`, `422`, `502`, `503` |
+
+The current agent endpoint persists `running` before calling the provider, then commits `completed` or `failed`. Provider SDK objects do not cross the adapter boundary. Citation records contain only HTTPS URLs with bounded titles and excerpts. The target version returns `202`, queues execution, streams progress and resumes from persisted checkpoints.
 
 ### Target Sync APIs
 
@@ -867,4 +894,3 @@ Useful implementation references:
 - Docker runtime: `docker-compose.yml`
 
 These paths map directly to the logical layers described above and make the design demonstrable rather than purely theoretical.
-

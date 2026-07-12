@@ -12,6 +12,13 @@
 - Pull-request CodeQL, Gitleaks, Bandit, dependency review, and dependency audit automation
 - Pinned GitHub Action revisions with restricted workflow permissions
 - CODEOWNERS coverage for broker, core security, deployment, and workflow changes
+- Gemini key remains a backend-only environment secret and provider readiness exposes only a boolean
+- Agent prompts are length-bounded and every run is scoped to the authenticated user
+- Citation URLs are accepted only as valid HTTPS links; stored answers, titles and excerpts are size-bounded
+- Gemini errors are sanitized before persistence and API responses
+- AI research has no broker credentials, trading writes or order-execution tools
+
+The Gemini free tier may use submitted content to improve Google products under its current terms. The first research slice must therefore be used for public research prompts only. Private portfolio context will not be sent to a cloud model until an explicit provider-data policy and user consent control are implemented.
 
 ## Production Improvements
 
@@ -23,6 +30,7 @@
 - CSRF protection for cookie-authenticated writes
 - WAF, security headers, dependency scanning, and container scanning
 - Data retention, user export, and deletion workflows
+- Agent rate limits, per-run tool/token budgets, prompt-injection evaluations and provider data-consent controls
 
 See [21_HIGH_LEVEL_DESIGN.md](21_HIGH_LEVEL_DESIGN.md) for the threat controls and [23_ARCHITECTURE_IMPROVEMENT_PLAN.md](23_ARCHITECTURE_IMPROVEMENT_PLAN.md) for the prioritized hardening sequence.
 

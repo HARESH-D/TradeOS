@@ -79,3 +79,20 @@ class Trade(Base):
     holding_minutes: Mapped[int] = mapped_column(Integer, default=0)
     raw_data: Mapped[dict | None] = mapped_column(JSON, nullable=True)
 
+
+class AgentRun(Base):
+    __tablename__ = "agent_runs"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True)
+    mode: Mapped[str] = mapped_column(String(30), default="research")
+    provider: Mapped[str] = mapped_column(String(30), default="gemini")
+    model: Mapped[str] = mapped_column(String(120))
+    status: Mapped[str] = mapped_column(String(30), index=True)
+    prompt: Mapped[str] = mapped_column(Text)
+    answer: Mapped[str | None] = mapped_column(Text, nullable=True)
+    sources: Mapped[list | None] = mapped_column(JSON, nullable=True)
+    search_queries: Mapped[list | None] = mapped_column(JSON, nullable=True)
+    error_message: Mapped[str | None] = mapped_column(Text, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, index=True)
+    completed_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)

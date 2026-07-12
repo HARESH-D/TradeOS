@@ -5,7 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from sqlalchemy import select
 
-from app.api.routes import analytics, auth, broker
+from app.api.routes import agent, analytics, auth, broker
 from app.core.config import settings
 from app.core.security import hash_password
 from app.db.models import BrokerAccount, User
@@ -57,6 +57,7 @@ app.add_middleware(
 app.include_router(auth.router, prefix=settings.api_prefix)
 app.include_router(broker.router, prefix=settings.api_prefix)
 app.include_router(analytics.router, prefix=settings.api_prefix)
+app.include_router(agent.router, prefix=settings.api_prefix)
 
 
 @app.get("/health")

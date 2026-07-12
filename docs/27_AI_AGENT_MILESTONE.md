@@ -71,7 +71,11 @@ Start as a deterministic workflow with one coordinating model. Add orchestrator-
 
 Gemini is the first cloud provider because its API supports function calling and grounded Google Search with returned citations. The model name must be configuration, not application logic, so free-tier model availability can change without a code deployment.
 
+The first implementation defaults to `gemini-2.5-flash` because its current free tier includes a limited grounded-search allowance. Newer models may expose different billing rules. Recheck official pricing before changing the production model.
+
 Store `GEMINI_API_KEY` only in backend environment variables. Enforce per-user and global budgets, retry `429` responses with jitter, and expose quota exhaustion as a resumable run state.
+
+Free-tier provider terms may permit submitted content to be used for service improvement. Until explicit consent and provider-data controls exist, Gemini research accepts public research prompts only and does not receive imported portfolio or broker data.
 
 ### Local Llama
 
@@ -122,17 +126,19 @@ The verifier is not allowed to approve its own unsupported claim merely because 
 
 ### Slice A: Workspace
 
-- AI Agent navigation and route
-- Research, trade review, and portfolio modes
-- Provider status and run-history surfaces
-- Non-functional composer until a runtime is configured
+- [x] AI Agent navigation and route
+- [x] Research, trade review, and portfolio mode surfaces
+- [x] Provider status and run history
+- [x] Composer gated by actual runtime capability
 
 ### Slice B: Grounded Research
 
-- Gemini provider adapter
-- Search, URL fetch, evidence extraction, and citation rendering
-- Persistent runs and server-sent event streaming
-- Rate limits and run budgets
+- [x] Gemini provider adapter
+- [x] Grounded Search and citation rendering
+- [x] Persistent completed and failed runs
+- [ ] Dedicated URL fetch and normalized evidence extraction
+- [ ] Server-sent event streaming
+- [ ] Rate limits and run budgets
 
 ### Slice C: Trade Analyst
 

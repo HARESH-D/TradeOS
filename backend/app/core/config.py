@@ -17,6 +17,10 @@ class Settings(BaseSettings):
     broker_public_ip: str | None = None
     broker_local_ip: str | None = None
     broker_mac_address: str | None = None
+    gemini_api_key: str | None = None
+    gemini_model: str = "gemini-2.5-flash"
+    gemini_api_url: str = "https://generativelanguage.googleapis.com/v1/interactions"
+    agent_request_timeout_seconds: float = 90
 
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
