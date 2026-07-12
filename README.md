@@ -11,6 +11,7 @@ The current application includes:
 - Manual broker sync with demo and Angel One SmartAPI connection modes
 - Manual Angel One P&L statement import from XLSX when live broker sync is unavailable
 - Spreadsheet-style trade analysis with per-column filters, sorting, pagination and CSV export
+- AI Agent workspace shell for the clean-room research and trade-analysis milestone
 - Persistent SQLite development data and PostgreSQL-backed Docker deployment
 - Encrypted broker API keys and session tokens; broker PIN and TOTP are never stored
 

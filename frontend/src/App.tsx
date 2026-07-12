@@ -6,6 +6,7 @@ import { LoginPage } from './pages/LoginPage'
 import type { User } from './types'
 
 const AnalysisPage = lazy(() => import('./pages/AnalysisPage').then((module) => ({ default: module.AnalysisPage })))
+const AgentPage = lazy(() => import('./pages/AgentPage').then((module) => ({ default: module.AgentPage })))
 const BrokerPage = lazy(() => import('./pages/BrokerPage').then((module) => ({ default: module.BrokerPage })))
 const DashboardPage = lazy(() => import('./pages/DashboardPage').then((module) => ({ default: module.DashboardPage })))
 
@@ -38,6 +39,7 @@ export default function App() {
             <Route path="/" element={<DashboardPage />} />
             <Route path="/broker" element={<BrokerPage />} />
             <Route path="/analysis" element={<AnalysisPage />} />
+            <Route path="/agent" element={<AgentPage />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </Suspense>

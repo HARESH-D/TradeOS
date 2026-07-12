@@ -40,6 +40,12 @@ Visual direction:
    - Symbol/product filters
    - Detailed trade/order/position rows
 
+4. AI Agent
+   - Research, trade review, and portfolio modes
+   - Gemini and local Llama provider selector
+   - Research run history and runtime status
+   - Task composer with source and read-only guardrails
+
 ## Future Screens
 
 - Portfolio
@@ -47,6 +53,6 @@ Visual direction:
 - Journal
 - Rule Engine
 - Analytics reports
-- AI Coach
+- AI Coach reports and completed research-run views
 - Replay Mode
 - Settings

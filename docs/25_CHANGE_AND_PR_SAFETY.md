@@ -72,6 +72,7 @@ Update this table in each release PR. Use the final PR number and merge commit a
 | 2026-07-12 | PR `#1` / `5b5d390` | Trading dashboard, manual broker sync, analysis grid, documentation, and deployment bundle | High | Backend tests, frontend build and audit, Docker production smoke tests, browser smoke tests |
 | 2026-07-12 | PR `#1` / `c077844` | Add PR governance, quality gates, security scans, dependency automation, and patched backend dependencies | Medium | Full local quality gate, image builds, workflow validation, and GitHub checks |
 | 2026-07-12 | PR `#16` / `6223039` | Add Angel One statement import, statement-aware analytics, and Vercel POC backend support | High | Full quality gate, dependency audits, real-workbook parsing, and duplicate-safe HTTP import smoke test |
+| 2026-07-12 | PR `#19` / `4cc8c77` | Add the AI Agent workspace shell and clean-room milestone architecture | Medium | Full quality gate, dependency audits, and responsive Playwright interaction checks |
 
 ## 7. Incident Rule
 

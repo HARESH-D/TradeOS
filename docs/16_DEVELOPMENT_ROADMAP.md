@@ -29,6 +29,11 @@
 
 ## Phase 4 - AI Coach
 
+- [x] Clean-room agent architecture
+- [x] AI Agent navigation and workspace shell
+- [ ] Gemini provider and grounded research workflow
+- [ ] Local Ollama/Llama companion runner
+- [ ] Persistent agent runs, evidence, and citations
 - AI trade review
 - Pattern detection
 - Monthly performance summary
