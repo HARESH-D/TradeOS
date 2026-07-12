@@ -1,5 +1,3 @@
-from datetime import UTC, datetime
-
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import RedirectResponse
 from sqlalchemy import select
@@ -13,7 +11,6 @@ from app.db.models import BrokerAccount, SyncRun, User
 from app.db.session import get_db
 from app.schemas.api import BrokerConnectRequest
 from app.services.sync_service import run_sync
-
 
 router = APIRouter(prefix="/broker", tags=["broker"])
 

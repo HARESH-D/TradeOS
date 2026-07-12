@@ -6,7 +6,6 @@ from app.core.security import decode_access_token
 from app.db.models import User
 from app.db.session import get_db
 
-
 bearer = HTTPBearer(auto_error=False)
 
 

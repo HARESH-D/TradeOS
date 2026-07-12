@@ -44,8 +44,8 @@ For a containerized environment, run `docker compose up --build` and open `http:
 ## Verification
 
 ```bash
-cd backend && .venv/bin/pytest -q
-cd frontend && npm run build
+backend/.venv/bin/pip install -r backend/requirements-dev.txt
+./scripts/quality-gate.sh
 ```
 
 The product direction and future phases remain documented in [docs/00_MASTER_SPEC.md](docs/00_MASTER_SPEC.md) and [docs/16_DEVELOPMENT_ROADMAP.md](docs/16_DEVELOPMENT_ROADMAP.md).
@@ -53,3 +53,5 @@ The product direction and future phases remain documented in [docs/00_MASTER_SPE
 For an interview-ready explanation of the architecture, begin with [docs/20_SYSTEM_DESIGN_GUIDE.md](docs/20_SYSTEM_DESIGN_GUIDE.md), then use the linked HLD, LLD, and architecture improvement plan for deeper discussion.
 
 The production deployment bundle and operator steps are documented in [docs/24_ORACLE_VERCEL_DEPLOYMENT.md](docs/24_ORACLE_VERCEL_DEPLOYMENT.md).
+
+Commit, pull request, automated review, and rollback rules are documented in [docs/25_CHANGE_AND_PR_SAFETY.md](docs/25_CHANGE_AND_PR_SAFETY.md). Security vulnerabilities should be reported using [SECURITY.md](SECURITY.md).

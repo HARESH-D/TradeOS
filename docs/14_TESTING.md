@@ -13,9 +13,10 @@
 ## Commands
 
 ```bash
-cd backend && .venv/bin/pytest -q
-cd frontend && npm run build
-cd frontend && npm audit --audit-level=moderate
+backend/.venv/bin/pip install -r backend/requirements-dev.txt
+./scripts/quality-gate.sh
 ```
+
+Every pull request also runs CodeQL, Gitleaks, dependency review, Python static analysis, dependency audits, Docker Compose validation, and production image builds. See [25_CHANGE_AND_PR_SAFETY.md](25_CHANGE_AND_PR_SAFETY.md) for blocking behavior and review policy.
 
 API integration tests and automated browser regression tests should be added as the first slice evolves.
