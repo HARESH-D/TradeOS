@@ -39,7 +39,13 @@
 
 ## Priority 4 - AI and Advanced Features
 
-- AI Coach
+- [x] AI Agent navigation and workspace shell
+- [x] Clean-room provider-neutral agent design
+- [ ] Gemini grounded research provider
+- [ ] Ollama/Llama local provider
+- [ ] Evidence ledger and citation verifier
+- [ ] Persistent runs and resumable checkpoints
+- [ ] AI Coach
 - AI trade review
 - Monthly AI summary
 - Replay mode

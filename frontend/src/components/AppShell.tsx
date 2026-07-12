@@ -1,5 +1,6 @@
 import {
   BarChart3,
+  Bot,
   CandlestickChart,
   ChevronLeft,
   LayoutDashboard,
@@ -25,12 +26,14 @@ const navigation = [
   { label: 'Dashboard', icon: LayoutDashboard, to: '/' },
   { label: 'Broker Sync', icon: RefreshCw, to: '/broker' },
   { label: 'Analysis', icon: TableProperties, to: '/analysis' },
+  { label: 'AI Agent', icon: Bot, to: '/agent' },
 ]
 
 const titles: Record<string, string> = {
   '/': 'Dashboard',
   '/broker': 'Broker Sync',
   '/analysis': 'Trade Analysis',
+  '/agent': 'AI Agent',
 }
 
 export function AppShell({ children, user, onLogout }: AppShellProps) {
@@ -81,4 +84,3 @@ export function AppShell({ children, user, onLogout }: AppShellProps) {
     </div>
   )
 }
-
