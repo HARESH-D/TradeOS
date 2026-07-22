@@ -1,6 +1,6 @@
 from datetime import date, datetime
 
-from sqlalchemy import JSON, Date, DateTime, Float, ForeignKey, Integer, String, Text, UniqueConstraint
+from sqlalchemy import JSON, Boolean, Date, DateTime, Float, ForeignKey, Integer, String, Text, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.session import Base
@@ -77,6 +77,33 @@ class Trade(Base):
     entry_time: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
     exit_time: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
     holding_minutes: Mapped[int] = mapped_column(Integer, default=0)
+    raw_data: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+
+
+class TradeExecution(Base):
+    __tablename__ = "trade_executions"
+    __table_args__ = (
+        UniqueConstraint("broker_account_id", "execution_key", name="uq_account_trade_execution"),
+    )
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True)
+    broker_account_id: Mapped[int] = mapped_column(ForeignKey("broker_accounts.id"), index=True)
+    execution_key: Mapped[str] = mapped_column(String(255))
+    trade_id: Mapped[str] = mapped_column(String(120), index=True)
+    order_id: Mapped[str] = mapped_column(String(120), index=True)
+    symbol: Mapped[str] = mapped_column(String(40), index=True)
+    isin: Mapped[str] = mapped_column(String(32), index=True)
+    exchange: Mapped[str] = mapped_column(String(20))
+    segment: Mapped[str] = mapped_column(String(30))
+    series: Mapped[str] = mapped_column(String(20))
+    side: Mapped[str] = mapped_column(String(10), index=True)
+    auction: Mapped[bool] = mapped_column(Boolean, default=False)
+    quantity: Mapped[int] = mapped_column(Integer)
+    price: Mapped[float] = mapped_column(Float)
+    trade_date: Mapped[date] = mapped_column(Date, index=True)
+    executed_at: Mapped[datetime] = mapped_column(DateTime, index=True)
+    imported_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     raw_data: Mapped[dict | None] = mapped_column(JSON, nullable=True)
 
 

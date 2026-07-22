@@ -17,6 +17,8 @@
 - Citation URLs are accepted only as valid HTTPS links; stored answers, titles and excerpts are size-bounded
 - Gemini errors are sanitized before persistence and API responses
 - AI research has no broker credentials, trading writes or order-execution tools
+- Local Llama receives only user-scoped read-only analytics context; portfolio rows use an explicit field allowlist and never include broker credentials
+- Ollama is disabled by default and its documented local endpoint binds to loopback; it must not be exposed directly to the public internet
 
 The Gemini free tier may use submitted content to improve Google products under its current terms. The first research slice must therefore be used for public research prompts only. Private portfolio context will not be sent to a cloud model until an explicit provider-data policy and user consent control are implemented.
 

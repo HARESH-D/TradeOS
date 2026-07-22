@@ -8,6 +8,7 @@
 - [x] Mock broker mode
 - [x] Dashboard metrics and charts
 - [x] Analysis grid with filters
+- [x] Idempotent Angel One tradebook import and FIFO-derived trades
 - [ ] Validate a live Angel One account sync
 - [ ] Add API and browser regression coverage
 
@@ -32,11 +33,12 @@
 - [x] Clean-room agent architecture
 - [x] AI Agent navigation and workspace shell
 - [x] Gemini provider and grounded research workflow
-- [ ] Local Ollama/Llama companion runner
+- [x] Local Ollama/Llama adapter for development trade and portfolio analysis
+- [ ] Authenticated outbound companion runner for the hosted application
 - [x] Persistent agent runs and citation records
 - [ ] Dedicated evidence ledger, resumable checkpoints and streaming
-- AI trade review
-- Pattern detection
+- [x] Initial AI trade review from deterministic aggregate metrics
+- [x] Initial pattern interpretation with structured output
 - Monthly performance summary
 - Personalized coaching from historical data
 - No price prediction

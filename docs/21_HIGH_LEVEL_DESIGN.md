@@ -6,14 +6,14 @@ This HLD defines the major runtime components, ownership boundaries, data flows,
 
 ## 2. System Context
 
-```mermaid
+:::mermaid
 flowchart LR
     T[Trader] --> TO[TradeOS]
     TO --> B[Angel One / Future Brokers]
     TO --> E[Email Provider - Future]
     TO --> N[Notification Providers - Future]
     TO --> AI[AI Provider - Future]
-```
+:::
 
 TradeOS owns authentication, broker connection metadata, normalized trading history, analytics, and user-facing presentation. The broker remains the authority for account state and execution records. TradeOS is a read model whose freshness is determined by the most recent successful sync.
 
@@ -179,20 +179,20 @@ Responsibilities:
 
 ## 4. Current Deployment
 
-```mermaid
+:::mermaid
 flowchart TB
     B[Browser] -->|localhost:8080| W[Nginx Container]
     W -->|Static assets| FE[React Build]
     W -->|/api| API[FastAPI Container]
     API --> DB[(PostgreSQL 16 Container)]
     API --> AO[Angel One HTTPS API]
-```
+:::
 
 Docker Compose provides a reproducible local environment. SQLite remains the no-configuration backend default outside Docker.
 
 ## 5. Production Deployment
 
-```mermaid
+:::mermaid
 flowchart TB
     DNS[DNS] --> CDN[CDN + WAF]
     CDN --> LB[Public Load Balancer]
@@ -214,7 +214,7 @@ flowchart TB
     PG --> REPLICA[(Read Replica)]
     API1 --> REPLICA
     API2 --> REPLICA
-```
+:::
 
 Deploy the API and worker from the same versioned application image with different process commands. This retains shared domain code while allowing independent autoscaling.
 
@@ -222,7 +222,7 @@ Deploy the API and worker from the same versioned application image with differe
 
 ### Authentication
 
-```mermaid
+:::mermaid
 sequenceDiagram
     actor User
     participant Web
@@ -236,13 +236,13 @@ sequenceDiagram
     API->>DB: Create session / audit event
     API-->>Web: Secure session cookie and user profile
     Web-->>User: Open dashboard
-```
+:::
 
 The target uses a short-lived secure HttpOnly cookie plus a rotating refresh session. The current implementation issues a seven-day bearer JWT stored by the browser.
 
 ### Broker Connection
 
-```mermaid
+:::mermaid
 sequenceDiagram
     actor User
     participant Web
@@ -261,11 +261,11 @@ sequenceDiagram
     API->>DB: Upsert broker account
     API-->>Web: Connected account metadata
     Note over API,DB: PIN and TOTP are discarded
-```
+:::
 
 ### Asynchronous Manual Sync
 
-```mermaid
+:::mermaid
 sequenceDiagram
     actor User
     participant Web
@@ -289,11 +289,11 @@ sequenceDiagram
     Worker->>Cache: Invalidate dashboard keys and release lock
     Web->>API: GET /broker/sync/{id}
     API-->>Web: Progress and resource statuses
-```
+:::
 
 ### Dashboard Query
 
-```mermaid
+:::mermaid
 sequenceDiagram
     actor User
     participant Web
@@ -311,7 +311,7 @@ sequenceDiagram
         API->>Cache: Cache short-lived response
     end
     API-->>Web: KPIs, series, calendar, recent trades, freshness
-```
+:::
 
 ## 7. Reliability Design
 

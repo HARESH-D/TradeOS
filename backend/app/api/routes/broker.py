@@ -10,15 +10,15 @@ from app.core.security import encrypt_secret
 from app.db.models import BrokerAccount, SyncRun, User
 from app.db.session import get_db
 from app.schemas.api import BrokerConnectRequest
-from app.services.statement_import_service import (
-    StatementFormatError,
-    import_angel_pnl_statement,
-    parse_angel_pnl_statement,
-)
 from app.services.sync_service import run_sync
+from app.services.tradebook_import_service import (
+    TradebookFormatError,
+    import_angel_tradebook,
+    parse_angel_tradebook,
+)
 
 router = APIRouter(prefix="/broker", tags=["broker"])
-MAX_STATEMENT_BYTES = 4 * 1024 * 1024
+MAX_TRADEBOOK_BYTES = 4 * 1024 * 1024
 
 
 @router.get("/angel-one/callback", include_in_schema=False)
@@ -28,6 +28,7 @@ def angel_one_callback():
 
 def _account_response(account: BrokerAccount) -> dict:
     snapshot = account.raw_snapshot or {}
+    tradebook = snapshot.get("tradebook", {})
     return {
         "id": account.id,
         "broker_name": account.broker_name,
@@ -40,6 +41,8 @@ def _account_response(account: BrokerAccount) -> dict:
             "holdings": len(snapshot.get("holdings", [])),
             "orders": len(snapshot.get("orders", [])),
             "positions": len(snapshot.get("positions", [])),
+            "trades": int(tradebook.get("closed_trades", 0)) + int(tradebook.get("open_positions", 0)),
+            "executions": int(tradebook.get("total_executions", 0)),
         },
     }
 
@@ -98,8 +101,8 @@ async def sync_broker(user: User = Depends(current_user), db: Session = Depends(
     account = db.scalar(select(BrokerAccount).where(BrokerAccount.user_id == user.id).order_by(BrokerAccount.id.desc()))
     if not account:
         raise HTTPException(status_code=409, detail="Connect a broker before syncing")
-    if account.mode == "statement":
-        raise HTTPException(status_code=409, detail="Upload a new P&L statement to refresh this account")
+    if account.mode in {"statement", "tradebook"}:
+        raise HTTPException(status_code=409, detail="Upload a new tradebook to refresh this account")
     try:
         sync_run = await run_sync(db, account)
     except Exception as exc:
@@ -113,25 +116,25 @@ async def sync_broker(user: User = Depends(current_user), db: Session = Depends(
     }
 
 
-@router.post("/statement/import")
-async def import_pnl_statement(
+@router.post("/tradebook/import")
+async def import_tradebook(
     file: UploadFile = File(...),
     user: User = Depends(current_user),
     db: Session = Depends(get_db),
 ):
     filename = (file.filename or "").strip()
     if not filename.lower().endswith(".xlsx"):
-        raise HTTPException(status_code=415, detail="Upload an Angel One .xlsx P&L statement")
-    content = await file.read(MAX_STATEMENT_BYTES + 1)
+        raise HTTPException(status_code=415, detail="Upload an Angel One .xlsx equity tradebook")
+    content = await file.read(MAX_TRADEBOOK_BYTES + 1)
     await file.close()
-    if len(content) > MAX_STATEMENT_BYTES:
-        raise HTTPException(status_code=413, detail="The statement exceeds the 4 MB upload limit")
+    if len(content) > MAX_TRADEBOOK_BYTES:
+        raise HTTPException(status_code=413, detail="The tradebook exceeds the 4 MB upload limit")
     if not content:
-        raise HTTPException(status_code=422, detail="The uploaded statement is empty")
+        raise HTTPException(status_code=422, detail="The uploaded tradebook is empty")
     try:
-        statement = parse_angel_pnl_statement(content)
-        return import_angel_pnl_statement(db, user.id, statement, filename)
-    except StatementFormatError as exc:
+        tradebook = parse_angel_tradebook(content)
+        return import_angel_tradebook(db, user.id, tradebook, filename)
+    except TradebookFormatError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
 
 

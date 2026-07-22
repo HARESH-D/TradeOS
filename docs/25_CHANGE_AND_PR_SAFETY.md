@@ -74,6 +74,7 @@ Update this table in each release PR. Use the final PR number and merge commit a
 | 2026-07-12 | PR `#16` / `6223039` | Add Angel One statement import, statement-aware analytics, and Vercel POC backend support | High | Full quality gate, dependency audits, real-workbook parsing, and duplicate-safe HTTP import smoke test |
 | 2026-07-12 | PR `#19` / `4cc8c77` | Add the AI Agent workspace shell and clean-room milestone architecture | Medium | Full quality gate, dependency audits, and responsive Playwright interaction checks |
 | 2026-07-12 | PR `#20` / `3f8605f` | Add persistent Gemini grounded research, authenticated run APIs, citations, and result UI | High | Full quality gate, provider contract tests, user-isolation tests, HTTP smoke checks, and responsive browser verification |
+| 2026-07-22 | Pending PR | Replace manual P&L ingestion with idempotent Angel One tradebook executions and FIFO-derived analytics | High | Full backend suite, malformed-workbook and cumulative-import tests, real-workbook isolated validation, frontend type check and production build |
 
 ## 7. Incident Rule
 

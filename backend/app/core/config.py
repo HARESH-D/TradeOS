@@ -21,6 +21,13 @@ class Settings(BaseSettings):
     gemini_model: str = "gemini-2.5-flash"
     gemini_api_url: str = "https://generativelanguage.googleapis.com/v1/interactions"
     agent_request_timeout_seconds: float = 90
+    ollama_enabled: bool = False
+    ollama_base_url: str = "http://127.0.0.1:11434"
+    ollama_model: str = "llama3.1:8b"
+    ollama_context_length: int = 4_096
+    ollama_max_output_tokens: int = 700
+    ollama_health_timeout_seconds: float = 2
+    ollama_request_timeout_seconds: float = 180
 
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 

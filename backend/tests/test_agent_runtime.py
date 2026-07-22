@@ -1,4 +1,6 @@
 import asyncio
+import json
+from datetime import date
 
 import httpx
 import pytest
@@ -7,8 +9,10 @@ from sqlalchemy.orm import Session
 
 from app.agent.contracts import AgentProviderUnavailable, ResearchResult, ResearchSource
 from app.agent.gemini import GeminiResearchProvider
-from app.db.models import AgentRun, Base, User
-from app.services.agent_service import list_agent_runs, run_research
+from app.agent.ollama import OllamaAnalysisProvider
+from app.db.models import AgentRun, Base, BrokerAccount, Trade, User
+from app.services.agent_service import list_agent_runs, run_analysis, run_research
+from app.services.analytics_service import agent_analysis_context
 
 
 class FakeResearchProvider:
@@ -29,6 +33,14 @@ class UnavailableProvider:
 
     async def research(self, prompt: str) -> ResearchResult:
         raise AgentProviderUnavailable("Provider is offline")
+
+
+class FakeAnalysisProvider:
+    name = "llama"
+    model = "test-llama"
+
+    async def analyze(self, prompt: str, mode: str, context: dict) -> ResearchResult:
+        return ResearchResult(answer=f"{mode}: {prompt}; trades={context['headline_metrics']['trade_count']}")
 
 
 def create_user(db: Session, email: str = "agent@tradeos.app") -> User:
@@ -97,6 +109,58 @@ def test_gemini_provider_parses_answer_queries_and_unique_citations():
     assert result.sources[0].cited_text == "A supported claim"
 
 
+def test_ollama_provider_discovers_model_and_parses_structured_analysis():
+    structured = {
+        "summary": "Loss size outweighed a positive win rate.",
+        "patterns": [
+            {
+                "observation": "Losses were larger than wins.",
+                "evidence": "Average loss exceeded average win.",
+                "confidence": "high",
+            }
+        ],
+        "uncertainties": ["The sample is small."],
+        "next_checks": ["Review loss exits.", "Segment by symbol.", "Compare holding times."],
+    }
+
+    async def handler(request: httpx.Request) -> httpx.Response:
+        if request.url.path == "/api/tags":
+            return httpx.Response(200, json={"models": [{"name": "llama-test"}]})
+        payload = json.loads(request.content)
+        assert payload["model"] == "llama-test"
+        assert payload["stream"] is False
+        assert payload["format"]["type"] == "object"
+        return httpx.Response(200, json={"message": {"content": json.dumps(structured)}})
+
+    async def call_provider():
+        transport = httpx.MockTransport(handler)
+        async with httpx.AsyncClient(transport=transport) as client:
+            provider = OllamaAnalysisProvider(
+                base_url="http://127.0.0.1:11434", model="llama-test", enabled=True, client=client
+            )
+            assert await provider.available() is True
+            return await provider.analyze(
+                "Review my trades",
+                "trades",
+                {
+                    "scope": {"start_date": "2026-01-01", "end_date": "2026-01-31"},
+                    "headline_metrics": {
+                        "trade_count": 8,
+                        "net_pnl": -1500,
+                        "win_rate": 62.5,
+                        "profit_factor": 0.81,
+                        "expectancy": -187.5,
+                    },
+                },
+            )
+
+    result = asyncio.run(call_provider())
+
+    assert "Closed trades: 8" in result.answer
+    assert "Losses were larger than wins" in result.answer
+    assert "Review loss exits" in result.answer
+
+
 def test_agent_run_persists_result_and_is_scoped_to_user():
     engine = create_engine("sqlite://")
     Base.metadata.create_all(engine)
@@ -128,3 +192,86 @@ def test_agent_run_records_provider_failure():
         assert run.status == "failed"
         assert run.completed_at is not None
         assert run.error_message == "Provider is offline"
+
+
+def test_trade_analysis_context_is_deterministic_and_user_scoped():
+    engine = create_engine("sqlite://")
+    Base.metadata.create_all(engine)
+    with Session(engine) as db:
+        user = create_user(db)
+        other_user = create_user(db, "context-other@tradeos.app")
+        account = BrokerAccount(
+            user_id=user.id,
+            broker_name="Test",
+            mode="demo",
+            account_balance=50_000,
+            raw_snapshot={
+                "holdings": [{"symbol": "NIFTY", "quantity": 1, "api_key": "must-not-reach-model"}],
+                "positions": [],
+            },
+        )
+        other_account = BrokerAccount(user_id=other_user.id, broker_name="Test", mode="demo")
+        db.add_all([account, other_account])
+        db.flush()
+        db.add_all(
+            [
+                Trade(
+                    user_id=user.id,
+                    broker_account_id=account.id,
+                    broker_trade_id="winner",
+                    symbol="NIFTY",
+                    direction="LONG",
+                    quantity=1,
+                    entry_price=100,
+                    exit_price=110,
+                    net_pnl=1_000,
+                    status="CLOSED",
+                    trade_date=date(2026, 1, 2),
+                    holding_minutes=60,
+                ),
+                Trade(
+                    user_id=user.id,
+                    broker_account_id=account.id,
+                    broker_trade_id="loser",
+                    symbol="BANKNIFTY",
+                    direction="SHORT",
+                    quantity=1,
+                    entry_price=100,
+                    exit_price=80,
+                    net_pnl=-2_000,
+                    status="CLOSED",
+                    trade_date=date(2026, 1, 3),
+                    holding_minutes=10,
+                ),
+                Trade(
+                    user_id=other_user.id,
+                    broker_account_id=other_account.id,
+                    broker_trade_id="other",
+                    symbol="SECRET",
+                    direction="LONG",
+                    quantity=1,
+                    entry_price=1,
+                    exit_price=2,
+                    net_pnl=99_999,
+                    status="CLOSED",
+                    trade_date=date(2026, 1, 4),
+                ),
+            ]
+        )
+        db.commit()
+
+        context = agent_analysis_context(db, user.id, "trades")
+        run = asyncio.run(
+            run_analysis(db, user.id, "Find my largest process risk", "trades", context, FakeAnalysisProvider())
+        )
+
+        assert context["headline_metrics"]["trade_count"] == 2
+        assert context["headline_metrics"]["net_pnl"] == -1_000
+        assert context["outcome_metrics"]["average_winner_hold_minutes"] == 60
+        assert context["outcome_metrics"]["average_loser_hold_minutes"] == 10
+        assert {row["name"] for row in context["by_symbol"]} == {"NIFTY", "BANKNIFTY"}
+        assert run.mode == "trades"
+        assert run.provider == "llama"
+
+        portfolio_context = agent_analysis_context(db, user.id, "portfolio")
+        assert portfolio_context["portfolio"]["holdings"] == [{"symbol": "NIFTY", "quantity": 1}]
