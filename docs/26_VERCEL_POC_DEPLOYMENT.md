@@ -8,7 +8,7 @@ This runbook is the current zero-cost proof-of-concept topology:
 Browser -> Vercel Vite frontend -> Vercel FastAPI function -> managed PostgreSQL
 ```
 
-It supports authentication, dashboard analytics, the analysis grid, demo sync and Angel One P&L statement upload. It is not the final live-broker topology because Vercel Hobby does not provide a dedicated outbound IPv4.
+It supports authentication, dashboard analytics, the analysis grid, demo sync and Angel One equity tradebook upload. It is not the final live-broker topology because Vercel Hobby does not provide a dedicated outbound IPv4.
 
 ## Projects
 
@@ -54,26 +54,27 @@ Redeploy the frontend after changing the value because Vite embeds it at build t
 
 1. Confirm `GET https://<backend-host>/health` returns `status: ok`.
 2. Register a new user from the frontend.
-3. Open Broker and upload an Angel One equity P&L `.xlsx` statement.
+3. Open Broker and upload an Angel One equity tradebook `.xlsx` file.
 4. Confirm the import summary and sync-history record appear.
-5. Confirm dashboard and analysis rows contain only that user's imported data.
-6. Upload the same statement again and confirm trades are replaced rather than duplicated.
-7. When Gemini is configured, run a public research question and confirm the answer and source links persist after refresh.
+5. Confirm dashboard and analysis rows use the execution entry and exit dates and contain only that user's imported data.
+6. Upload the same tradebook again and confirm it reports zero new executions.
+7. Upload a later cumulative tradebook and confirm only unseen Trade IDs are added.
+8. When Gemini is configured, run a public research question and confirm the answer and source links persist after refresh.
 
-## Statement Semantics
+## Tradebook Semantics
 
-The P&L statement contains symbol-level aggregates, open positions, charges and ledger adjustments. It does not contain individual execution timestamps. TradeOS therefore:
+The Angel One tradebook contains individual fills with Trade IDs, Order IDs, quantities, prices and execution timestamps. TradeOS therefore:
 
-- Allocates statement costs across realized symbols by turnover.
-- Stores the source rows, statement summary, charges and adjustments in the account snapshot.
-- Marks open quantities as open positions and realized quantities as closed aggregates.
-- Uses the report period end as the normalized trade date.
-- Replaces the prior statement-derived dataset on each successful upload.
+- Stores each execution once using account, exchange, segment, trade date and Trade ID as its identity.
+- Preserves previous executions when cumulative or date-sliced files are uploaded.
+- Rebuilds derived long-equity trades using FIFO by ISIN after each successful import.
+- Uses the sell date as the realized date and retains both entry and exit timestamps.
+- Keeps remaining buys as immutable lots, presents them as weighted open positions, and reports sells that lack earlier buy history as unmatched.
 
-Import the Angel One tradebook in a later phase to obtain true entry, exit and holding-period analysis.
+The tradebook does not include broker charges. Current P&L is execution-derived before charges; exact net P&L requires a later contract-note or charge-reconciliation import.
 
 ## Broker IP Limitation
 
 The user's home Wi-Fi public IP is not the outbound IP of a Vercel backend request. A Vercel function calls Angel One from Vercel infrastructure, and Hobby egress may change. Updating an Angel One allowlist weekly does not guarantee uninterrupted sync because the platform IP can change inside that interval.
 
-For the POC, use statement upload as the dependable path and treat live sync as experimental. When fixed egress becomes necessary, move only the backend and database to the reserved-IP topology in [24_ORACLE_VERCEL_DEPLOYMENT.md](24_ORACLE_VERCEL_DEPLOYMENT.md); the API boundary and frontend can remain unchanged.
+For the POC, use tradebook upload as the dependable path and treat live sync as experimental. When fixed egress becomes necessary, move only the backend and database to the reserved-IP topology in [24_ORACLE_VERCEL_DEPLOYMENT.md](24_ORACLE_VERCEL_DEPLOYMENT.md); the API boundary and frontend can remain unchanged.

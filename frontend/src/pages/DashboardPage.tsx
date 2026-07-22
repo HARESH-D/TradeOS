@@ -49,7 +49,7 @@ export function DashboardPage() {
     <div className="dashboard-page">
       <div className="workspace-toolbar">
         <div className="sync-summary"><span className={`status-dot ${data.broker.status}`} /> <strong>{data.broker.name ?? 'No broker'}</strong><span>Last sync {formatDateTime(data.broker.last_synced_at)}</span></div>
-        <div className="toolbar-actions"><button className="select-button"><CalendarDays size={16} />All history</button>{data.broker.mode === 'statement' ? <Link className="primary-button" to="/broker"><Upload size={16} />Upload statement</Link> : <button className="primary-button" onClick={sync} disabled={syncing}><RefreshCw size={16} className={syncing ? 'spin' : ''} />{syncing ? 'Syncing...' : 'Sync broker'}</button>}</div>
+        <div className="toolbar-actions"><button className="select-button"><CalendarDays size={16} />All history</button>{['statement', 'tradebook'].includes(data.broker.mode ?? '') ? <Link className="primary-button" to="/broker"><Upload size={16} />Upload tradebook</Link> : <button className="primary-button" onClick={sync} disabled={syncing || data.broker.status === 'disconnected'}><RefreshCw size={16} className={syncing ? 'spin' : ''} />{syncing ? 'Syncing...' : 'Sync broker'}</button>}</div>
       </div>
       {error && <div className="page-alert">{error}</div>}
 

@@ -73,22 +73,26 @@ export type SyncRun = {
   error_message: string | null
 }
 
-export type StatementImportResult = {
+export type TradebookImportResult = {
   status: string
-  records_imported: number
-  realized_positions: number
+  executions_received: number
+  executions_added: number
+  executions_existing: number
+  total_executions: number
+  closed_trades: number
+  open_lots: number
   open_positions: number
-  charges: number
-  adjustments: number
+  unmatched_sell_executions: number
+  unmatched_sell_quantity: number
   period_start: string
   period_end: string
-  date_basis: string
+  charges_included: boolean
 }
 
 export type AgentRuntimeStatus = {
   providers: {
-    gemini: { configured: boolean; model: string | null }
-    llama: { configured: boolean; model: string | null }
+    gemini: { configured: boolean; model: string | null; modes: Array<'research' | 'trades' | 'portfolio'> }
+    llama: { configured: boolean; model: string | null; modes: Array<'research' | 'trades' | 'portfolio'> }
   }
   modes: Record<'research' | 'trades' | 'portfolio', boolean>
 }

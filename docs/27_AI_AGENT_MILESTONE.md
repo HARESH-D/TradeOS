@@ -83,6 +83,19 @@ Ollama exposes tool calling and multi-turn agent loops for supported local model
 
 The Vercel backend cannot call `localhost` on the user's computer. Local inference therefore requires a TradeOS local runner that makes an authenticated outbound connection, claims queued model jobs, sends results back, and never accepts public inbound traffic. Runs remain queued or can fall back to Gemini while the runner is offline.
 
+The development adapter is now implemented for trade review and portfolio analysis when FastAPI and Ollama run on the same machine. It discovers the configured model through `/api/tags`, sends only user-scoped deterministic aggregates and allowlisted portfolio fields, validates a bounded JSON schema, and renders the answer server-side. Hosted companion transport remains pending.
+
+### Local Model Evaluation
+
+On the current Ryzen 5 4600H, 22 GiB RAM and GTX 1650 Ti 4 GiB development machine:
+
+| Model | Quantized size | Observed speed | Decision |
+|---|---:|---:|---|
+| Llama 3.1 8B Q4_K_M | 4.9 GB | about 8 tokens/s | Selected minimum quality tier |
+| Llama 3.2 3B | 2.0 GB | about 57 tokens/s | Rejected after row and outcome hallucinations |
+
+The 8B model also made arithmetic errors when given raw rows. With a deterministic metrics tool it produced the correct tool call and preserved supplied metrics. Therefore TradeOS never delegates calculations to the model: application code computes facts, while Llama performs bounded interpretation. These measurements are machine-specific and must be rerun when hardware, runtime, quantization or prompts change.
+
 ## 6. Core Contracts
 
 ```text
@@ -142,15 +155,16 @@ The verifier is not allowed to approve its own unsupported claim merely because 
 
 ### Slice C: Trade Analyst
 
-- Read-only dashboard and analysis tools
-- Deterministic calculations
-- Retrospective trade review and pattern reports
+- [x] Read-only dashboard and analysis context
+- [x] Deterministic calculations
+- [x] Initial retrospective trade review and pattern reports
 
 ### Slice D: Local Models
 
-- Ollama provider adapter
-- Authenticated local companion runner
-- Capability discovery and cloud fallback policy
+- [x] Ollama provider adapter for same-machine development
+- [x] Capability and installed-model discovery
+- [ ] Authenticated local companion runner
+- [ ] Cloud fallback policy
 
 ### Slice E: Reliability
 

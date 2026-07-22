@@ -9,9 +9,10 @@ The current application includes:
 - Email/password authentication with a seeded demo account
 - Responsive trading dashboard with KPIs, equity curve, daily P&L and profit calendar
 - Manual broker sync with demo and Angel One SmartAPI connection modes
-- Manual Angel One P&L statement import from XLSX when live broker sync is unavailable
+- Idempotent Angel One equity tradebook import with execution dates, FIFO matching and repeat-upload deduplication
 - Spreadsheet-style trade analysis with per-column filters, sorting, pagination and CSV export
 - Persistent AI Agent research runs with Gemini grounded-search citations when the backend key is configured
+- Local Llama 3.1 8B trade and portfolio analysis through Ollama with deterministic TradeOS metrics
 - Persistent SQLite development data and PostgreSQL-backed Docker deployment
 - Encrypted broker API keys and session tokens; broker PIN and TOTP are never stored
 
@@ -25,6 +26,9 @@ python3 -m virtualenv .venv
 .venv/bin/pip install -r requirements.txt
 .venv/bin/uvicorn app.main:app --reload
 ```
+
+For private local analysis, install Ollama, run `ollama pull llama3.1:8b`, and start the API with
+`OLLAMA_ENABLED=true`. Ollama remains on `127.0.0.1:11434`; the hosted Vercel API cannot reach it.
 
 Start the web application in another terminal:
 

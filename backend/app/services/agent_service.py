@@ -3,7 +3,7 @@ from datetime import UTC, datetime
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.agent.contracts import ResearchProvider
+from app.agent.contracts import AnalysisProvider, ResearchProvider
 from app.agent.gemini import GeminiResearchProvider
 from app.db.models import AgentRun
 
@@ -56,6 +56,47 @@ async def run_research(
 
     try:
         result = await selected.research(run.prompt)
+        run.answer = result.answer
+        run.sources = [source.__dict__ for source in result.sources]
+        run.search_queries = result.search_queries
+        run.status = "completed"
+    except Exception as exc:
+        run.status = "failed"
+        run.error_message = str(exc)
+        run.completed_at = datetime.now(UTC).replace(tzinfo=None)
+        db.commit()
+        raise
+
+    run.completed_at = datetime.now(UTC).replace(tzinfo=None)
+    db.commit()
+    db.refresh(run)
+    return run
+
+
+async def run_analysis(
+    db: Session,
+    user_id: int,
+    prompt: str,
+    mode: str,
+    context: dict,
+    provider: AnalysisProvider,
+) -> AgentRun:
+    run = AgentRun(
+        user_id=user_id,
+        mode=mode,
+        provider=provider.name,
+        model=provider.model,
+        status="running",
+        prompt=prompt.strip(),
+        sources=[],
+        search_queries=[],
+    )
+    db.add(run)
+    db.commit()
+    db.refresh(run)
+
+    try:
+        result = await provider.analyze(run.prompt, mode, context)
         run.answer = result.answer
         run.sources = [source.__dict__ for source in result.sources]
         run.search_queries = result.search_queries

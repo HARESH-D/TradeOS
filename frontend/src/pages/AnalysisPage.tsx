@@ -11,6 +11,9 @@ import { currency, holdingTime } from '../lib/format'
 import type { Trade } from '../types'
 
 const moneyFormatter = ({ value }: ValueFormatterParams) => value == null ? '-' : currency.format(value)
+const dateTimeFormatter = ({ value }: ValueFormatterParams) => value == null
+  ? '-'
+  : new Date(value).toLocaleString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })
 
 export function AnalysisPage() {
   const [rows, setRows] = useState<Trade[]>([])
@@ -40,8 +43,10 @@ export function AnalysisPage() {
   useEffect(() => { const timeout = window.setTimeout(() => void load(), 220); return () => window.clearTimeout(timeout) }, [load])
 
   const columns = useMemo((): ColDef<Trade>[] => [
-    { field: 'trade_date', headerName: 'Trade date', minWidth: 132, sort: 'desc', filter: 'agDateColumnFilter', valueFormatter: ({ value }) => new Date(`${value}T12:00:00`).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) },
     { field: 'symbol', headerName: 'Symbol', pinned: 'left', minWidth: 135, cellClass: 'symbol-cell' },
+    { field: 'trade_date', headerName: 'Trade date', minWidth: 140, sort: 'desc', filter: 'agDateColumnFilter', valueFormatter: ({ value }) => new Date(`${value}T12:00:00`).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) },
+    { field: 'entry_time', headerName: 'Entry time', minWidth: 185, valueFormatter: dateTimeFormatter },
+    { field: 'exit_time', headerName: 'Exit time', minWidth: 185, valueFormatter: dateTimeFormatter },
     { field: 'exchange', headerName: 'Exchange', minWidth: 105 },
     { field: 'product', headerName: 'Product', minWidth: 125 },
     { field: 'direction', headerName: 'Side', minWidth: 95, cellClassRules: { 'positive': ({ value }) => value === 'LONG', 'negative': ({ value }) => value === 'SELL' } },
@@ -70,15 +75,15 @@ export function AnalysisPage() {
       </div>
       <div className="analysis-toolbar">
         <div className="search-field"><Search size={17} /><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search symbol or trade ID" />{search && <button onClick={() => setSearch('')} title="Clear search"><X size={15} /></button>}</div>
-        <label className="filter-select"><Filter size={16} /><select value={product} onChange={(event) => setProduct(event.target.value)}><option value="ALL">All products</option><option value="DELIVERY">Delivery</option><option value="SWING">Swing</option></select></label>
-        <label className="filter-select"><SlidersHorizontal size={16} /><select value={outcome} onChange={(event) => setOutcome(event.target.value)}><option value="">All outcomes</option><option value="win">Winners</option><option value="loss">Losers</option><option value="flat">Flat</option></select></label>
+        <label className="filter-select"><Filter size={16} /><select value={product} onChange={(event) => setProduct(event.target.value)}><option value="ALL">All products</option><option value="EQUITY">Equity</option><option value="DELIVERY">Delivery</option><option value="SWING">Swing</option></select></label>
+        <label className="filter-select"><SlidersHorizontal size={16} /><select value={outcome} onChange={(event) => setOutcome(event.target.value)}><option value="">All outcomes</option><option value="win">Winners</option><option value="loss">Losers</option><option value="flat">Flat</option><option value="open">Open positions</option></select></label>
         <button className="select-button date-filter"><CalendarRange size={16} />All dates</button>
         <div className="analysis-toolbar-spacer" />
         <button className="icon-button" onClick={resetFilters} title="Reset filters"><RefreshCw size={17} /></button>
         <button className="secondary-button" onClick={() => gridApi?.exportDataAsCsv({ fileName: 'tradeos-analysis.csv' })}><Download size={16} />Export CSV</button>
       </div>
       {error && <div className="page-alert error">{error}</div>}
-      <div className="grid-caption"><span><span className="live-dot" /> Synced broker records</span><span>Use the filter row below each column heading</span></div>
+      <div className="grid-caption"><span><span className="live-dot" /> Tradebook-derived records</span><span>FIFO P&amp;L currently excludes broker charges</span></div>
       <div className="ag-theme-quartz trade-grid">
         <AgGridReact<Trade>
           rowData={rows}

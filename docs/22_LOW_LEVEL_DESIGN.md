@@ -18,8 +18,9 @@ backend/app/
       analytics.py          dashboard and analysis reads
       agent.py              provider status and research runs
   agent/
-    contracts.py            provider-neutral research result contract
+    contracts.py            provider-neutral research and analysis contracts
     gemini.py               Gemini Interactions API and citation parsing
+    ollama.py               local model discovery, structured analysis and rendering
   broker/
     base.py                 canonical adapter protocol and snapshot types
     mock.py                 deterministic test/demo adapter
@@ -34,6 +35,7 @@ backend/app/
     api.py                  validated request objects
   services/
     sync_service.py         fetch, normalize, and persist broker records
+    tradebook_import_service.py validate XLSX, upsert executions, and rebuild FIFO trades
     analytics_service.py    KPI and time-series calculations
     agent_service.py        run persistence and provider orchestration
   main.py                   application composition and demo seed
@@ -242,7 +244,7 @@ erDiagram
 
 A broker trade book normally represents executions or fills, not a complete round trip. One order can produce many fills, a position can be entered and exited in pieces, and multiple orders can belong to one logical trade. Treating every fill as a closed trade produces incorrect P&L and win-rate metrics.
 
-The target model keeps executions immutable and derives logical trades through an allocation or matching process. Rebuilding derived trades remains possible without losing the broker source events.
+The current manual tradebook flow keeps executions immutable and derives long-equity trades through FIFO matching. Rebuilding derived trades remains possible without losing the broker source events. The target extends this policy to charges, shorts, derivatives, corporate actions and explicit matching-policy versions.
 
 ## 5. Recommended Table Definitions
 
@@ -378,14 +380,15 @@ All protected endpoints derive user identity from the session. Clients never pro
 | `GET` | `/api/broker` | Current broker metadata | `200`, `401` |
 | `POST` | `/api/broker/connect` | Connect demo or Angel One | `200`, `400`, `401`, `422` |
 | `POST` | `/api/broker/sync` | Run manual sync inline | `200`, `401`, `409`, `502` |
+| `POST` | `/api/broker/tradebook/import` | Import and deduplicate an Angel One equity tradebook | `200`, `401`, `413`, `415`, `422` |
 | `GET` | `/api/broker/sync/history` | Recent runs | `200`, `401` |
 | `GET` | `/api/dashboard` | Dashboard response | `200`, `401` |
 | `GET` | `/api/analysis` | Filtered normalized trades | `200`, `401`, `422` |
 | `GET` | `/api/agent/status` | Provider and mode readiness | `200`, `401` |
 | `GET` | `/api/agent/runs` | User-scoped research history | `200`, `401`, `422` |
-| `POST` | `/api/agent/runs` | Run Gemini grounded research inline | `200`, `401`, `409`, `422`, `502`, `503` |
+| `POST` | `/api/agent/runs` | Run Gemini research or local Llama analysis inline | `200`, `401`, `409`, `422`, `502`, `503` |
 
-The current agent endpoint persists `running` before calling the provider, then commits `completed` or `failed`. Provider SDK objects do not cross the adapter boundary. Citation records contain only HTTPS URLs with bounded titles and excerpts. The target version returns `202`, queues execution, streams progress and resumes from persisted checkpoints.
+The current agent endpoint persists `running` before calling the provider, then commits `completed` or `failed`. Gemini accepts research only. Llama accepts trade and portfolio modes only, using deterministic user-scoped aggregates and allowlisted portfolio fields from `analytics_service`; its JSON output is schema-validated before server-side text rendering. Provider SDK objects do not cross the adapter boundary. Citation records contain only HTTPS URLs with bounded titles and excerpts. The target version returns `202`, queues execution, streams progress and resumes from persisted checkpoints.
 
 ### Target Sync APIs
 

@@ -190,22 +190,22 @@ h1, h2, .brand-name { font-family: 'Manrope', sans-serif; letter-spacing: 0; }
 .sync-result strong { font-size: 13px; }
 .status-pill { min-width: 72px; border-radius: 12px; padding: 5px 8px; background: var(--green-soft); color: var(--green); text-align: center; text-transform: capitalize; font-size: 10px; font-weight: 600; }
 .status-pill.failed { background: var(--red-soft); color: var(--red); }
-.statement-panel { grid-column: 1 / -1; }
-.statement-import-body { min-height: 104px; padding: 16px; display: grid; grid-template-columns: minmax(280px, 1fr) auto; align-items: center; gap: 12px; }
-.statement-file-picker { min-width: 0; height: 70px; padding: 0 14px; border: 1px dashed #c9c6d9; border-radius: 6px; background: #faf9fe; display: flex; align-items: center; gap: 12px; color: #343641; text-align: left; }
-.statement-file-picker > span { flex: 0 0 38px; width: 38px; height: 38px; border-radius: 6px; display: grid; place-items: center; background: var(--accent-soft); color: var(--accent); }
-.statement-file-picker div { min-width: 0; }
-.statement-file-picker strong, .statement-file-picker small { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.statement-file-picker strong { font-size: 12px; }
-.statement-file-picker small { margin-top: 4px; color: var(--muted); font-size: 10px; }
-.statement-import-button { min-width: 150px; }
-.statement-result { margin: 0 16px 14px; display: grid; grid-template-columns: minmax(210px, 1.8fr) repeat(3, minmax(90px, .6fr)); border: 1px solid var(--border); border-radius: 6px; }
-.statement-result > div { min-height: 62px; padding: 10px 13px; display: flex; flex-direction: column; justify-content: center; border-right: 1px solid var(--border); }
-.statement-result > div:last-child { border-right: 0; }
-.statement-result span { color: var(--muted); font-size: 10px; }
-.statement-result strong { margin-top: 4px; font-size: 12px; }
-.statement-date-note { min-height: 42px; padding: 0 16px 14px; display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 10px; }
-.statement-date-note svg { flex: 0 0 auto; color: var(--green); }
+.tradebook-panel { grid-column: 1 / -1; }
+.tradebook-import-body { min-height: 104px; padding: 16px; display: grid; grid-template-columns: minmax(280px, 1fr) auto; align-items: center; gap: 12px; }
+.tradebook-file-picker { min-width: 0; height: 70px; padding: 0 14px; border: 1px dashed #c9c6d9; border-radius: 6px; background: #faf9fe; display: flex; align-items: center; gap: 12px; color: #343641; text-align: left; }
+.tradebook-file-picker > span { flex: 0 0 38px; width: 38px; height: 38px; border-radius: 6px; display: grid; place-items: center; background: var(--accent-soft); color: var(--accent); }
+.tradebook-file-picker div { min-width: 0; }
+.tradebook-file-picker strong, .tradebook-file-picker small { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tradebook-file-picker strong { font-size: 12px; }
+.tradebook-file-picker small { margin-top: 4px; color: var(--muted); font-size: 10px; }
+.tradebook-import-button { min-width: 150px; }
+.tradebook-result { margin: 0 16px 14px; display: grid; grid-template-columns: minmax(210px, 1.8fr) repeat(4, minmax(90px, .6fr)); border: 1px solid var(--border); border-radius: 6px; }
+.tradebook-result > div { min-height: 62px; padding: 10px 13px; display: flex; flex-direction: column; justify-content: center; border-right: 1px solid var(--border); }
+.tradebook-result > div:last-child { border-right: 0; }
+.tradebook-result span { color: var(--muted); font-size: 10px; }
+.tradebook-result strong { margin-top: 4px; font-size: 12px; }
+.tradebook-date-note { min-height: 42px; padding: 0 16px 14px; display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 10px; }
+.tradebook-date-note svg { flex: 0 0 auto; color: var(--green); }
 
 .analysis-summary-row { min-height: 70px; margin-bottom: 12px; border: 1px solid var(--border); border-radius: 7px; background: #fff; display: grid; grid-template-columns: repeat(3, 1fr); }
 .analysis-summary-row > div { padding: 0 20px; display: flex; flex-direction: column; justify-content: center; border-right: 1px solid var(--border); }
@@ -338,8 +338,8 @@ h1, h2, .brand-name { font-family: 'Manrope', sans-serif; letter-spacing: 0; }
   .dashboard-grid-top, .dashboard-grid-bottom, .broker-content-grid { grid-template-columns: 1fr; }
   .broker-content-grid { grid-template-columns: 1fr; }
   .connection-panel, .history-panel { min-height: auto; }
-  .statement-import-body { grid-template-columns: 1fr; }
-  .statement-import-button { width: 100%; }
+  .tradebook-import-body { grid-template-columns: 1fr; }
+  .tradebook-import-button { width: 100%; }
   .login-page { grid-template-columns: 1fr; }
   .agent-page { grid-template-columns: 1fr; }
   .agent-rail { min-height: auto; }
@@ -381,9 +381,10 @@ h1, h2, .brand-name { font-family: 'Manrope', sans-serif; letter-spacing: 0; }
   .form-grid { grid-template-columns: 1fr; }
   .sync-history-row { grid-template-columns: auto 1fr auto; }
   .sync-result { display: none; }
-  .statement-result { grid-template-columns: 1fr 1fr; }
-  .statement-result > div:nth-child(2) { border-right: 0; }
-  .statement-result > div:nth-child(-n+2) { border-bottom: 1px solid var(--border); }
+  .tradebook-result { grid-template-columns: 1fr 1fr; }
+  .tradebook-result > div { border-bottom: 1px solid var(--border); }
+  .tradebook-result > div:nth-child(even) { border-right: 0; }
+  .tradebook-result > div:last-child { border-bottom: 0; }
   .analysis-summary-row { grid-template-columns: 1fr 1fr; }
   .analysis-summary-row > div:last-child { display: none; }
   .analysis-toolbar { flex-wrap: wrap; }

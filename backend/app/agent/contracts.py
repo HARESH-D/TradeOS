@@ -29,3 +29,10 @@ class ResearchProvider(Protocol):
     model: str
 
     async def research(self, prompt: str) -> ResearchResult: ...
+
+
+class AnalysisProvider(Protocol):
+    name: str
+    model: str
+
+    async def analyze(self, prompt: str, mode: str, context: dict) -> ResearchResult: ...

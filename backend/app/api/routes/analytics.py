@@ -21,7 +21,7 @@ def dashboard(user: User = Depends(current_user), db: Session = Depends(get_db))
 def analysis_grid(
     search: str | None = None,
     product: str | None = None,
-    outcome: str | None = Query(default=None, pattern="^(win|loss|flat)$"),
+    outcome: str | None = Query(default=None, pattern="^(win|loss|flat|open)$"),
     start_date: date | None = None,
     end_date: date | None = None,
     sort_by: str = "trade_date",
@@ -43,11 +43,13 @@ def analysis_grid(
     if product and product != "ALL":
         filters.append(Trade.product == product)
     if outcome == "win":
-        filters.append(Trade.net_pnl > 0)
+        filters.extend((Trade.status == "CLOSED", Trade.net_pnl > 0))
     elif outcome == "loss":
-        filters.append(Trade.net_pnl < 0)
+        filters.extend((Trade.status == "CLOSED", Trade.net_pnl < 0))
     elif outcome == "flat":
-        filters.append(Trade.net_pnl == 0)
+        filters.extend((Trade.status == "CLOSED", Trade.net_pnl == 0))
+    elif outcome == "open":
+        filters.append(Trade.status == "OPEN")
     if start_date:
         filters.append(Trade.trade_date >= start_date)
     if end_date:
